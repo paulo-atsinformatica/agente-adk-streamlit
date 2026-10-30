@@ -1,0 +1,22 @@
+[project]
+name = "agente-adk-streamlit"
+version = "0.1.0"
+description = "Agente de exemplo com Google ADK, Streamlit, Groq, ferramenta própria, MCP público e guardrails"
+requires-python = ">=3.12"
+dependencies = [
+    "google-adk[mcp]>=2.13.0",
+    "litellm>=1.106.6",
+    "python-dotenv>=1.2.4",
+    "streamlit>=1.66.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+]
+
+[tool.pytest.ini_options]
+markers = ["mcp: acessa a internet (MCP público do DeepWiki)"]
+pythonpath = ["."]
+filterwarnings = ["ignore::DeprecationWarning"]
