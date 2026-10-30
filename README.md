@@ -32,15 +32,73 @@ Resposta + "passos do agente" (cada chamada de ferramenta e o resultado)
 
 ## Antes de começar
 
-1. **Python 3.12 e uv.** Instale o [uv](https://docs.astral.sh/uv/getting-started/installation/); ele baixa o Python certo sozinho.
+1. **uv.** Ele instala o Python certo (3.12) e as bibliotecas num ambiente virtual; veja a seção abaixo.
 2. **Chave gratuita da Groq.** Crie em [console.groq.com/keys](https://console.groq.com/keys). Trate como senha: não cole em chat, issue, print nem commit.
+
+## Ambiente virtual e bibliotecas com uv
+
+Cada projeto Python deve ter o seu **ambiente virtual** (venv): uma pasta com um Python e as bibliotecas só daquele projeto, para um projeto não quebrar o outro. Aqui quem cuida disso é o [uv](https://docs.astral.sh/uv/), que cria o venv, instala as bibliotecas e garante que todo mundo use as mesmas versões.
+
+**1. Instale o uv** (uma vez por computador):
+
+```bash
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS e Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Feche e abra o terminal e confira com `uv --version`.
+
+**2. Crie o venv e instale as bibliotecas** (na pasta do projeto):
+
+```bash
+uv sync
+```
+
+Esse comando lê o `.python-version` (Python 3.12; se você não tiver, o uv baixa), cria a pasta `.venv` e instala exatamente as versões do `uv.lock`. As bibliotecas do projeto estão listadas no `pyproject.toml`; o `uv.lock` guarda as versões exatas, para o projeto funcionar igual em qualquer máquina.
+
+**3. Rode comandos dentro do venv.** O jeito mais simples é pôr `uv run` na frente; não é preciso ativar nada:
+
+```bash
+uv run python --version
+uv run streamlit run app.py
+uv run pytest -q
+```
+
+Se preferir ativar o venv e usar os comandos direto:
+
+```bash
+# Windows (PowerShell)
+.venv\Scripts\activate
+
+# macOS e Linux
+source .venv/bin/activate
+
+python --version      # agora é o Python do projeto
+streamlit run app.py
+deactivate            # sai do venv
+```
+
+**4. Adicione, remova e atualize bibliotecas** sempre com o uv, para o `pyproject.toml` e o `uv.lock` ficarem certos:
+
+```bash
+uv add pandas                        # adiciona uma biblioteca ao projeto
+uv add --dev ruff                    # só para desenvolvimento (testes, formatação)
+uv remove pandas                     # remove
+uv lock --upgrade-package litellm    # atualiza uma biblioteca para a versão mais nova
+uv sync                              # aplica o que está no uv.lock
+```
+
+Evite `pip install` direto: a biblioteca entra no venv, mas não fica registrada no projeto, e quem clonar depois não a terá. Se algo der muito errado, apague a pasta `.venv` e rode `uv sync` de novo; ela é recriada do zero.
 
 ## Como rodar
 
 ```bash
 git clone https://github.com/paulo-atsinformatica/agente-adk-streamlit.git
 cd agente-adk-streamlit
-uv sync
+uv sync                     # cria o .venv e instala as bibliotecas (veja a seção acima)
 cp .env.example .env        # no Windows (PowerShell): copy .env.example .env
 ```
 
