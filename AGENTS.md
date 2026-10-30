@@ -1,6 +1,6 @@
 # Instruções para agentes de código
 
-Projeto de estudo: um agente com Google ADK, tela de chat em Streamlit, modelo da Groq (via LiteLLM), uma ferramenta própria, uma ferramenta MCP pública (DeepWiki) e guardrails. Quem usa este repositório está aprendendo; explique o que mudou e por quê, em português do Brasil.
+Projeto de estudo: um agente com Google ADK, tela de chat em Streamlit, modelo da Groq (via LiteLLM), uma ferramenta própria, um servidor MCP local em Python, um MCP público (DeepWiki) e guardrails. Quem usa este repositório está aprendendo; explique o que mudou e por quê, em português do Brasil.
 
 ## Comandos
 
@@ -15,6 +15,7 @@ Projeto de estudo: um agente com Google ADK, tela de chat em Streamlit, modelo d
 - `agente/agent.py`: monta o agente (modelo, instruções, ferramentas, guardrails). `root_agent` é usado pelo `adk web`.
 - `agente/ferramentas.py`: ferramentas próprias. A docstring é o que o modelo lê para decidir quando usar.
 - `agente/guardrails.py`: `guardrail_entrada` (antes do modelo) e `guardrail_ferramenta` (antes da ferramenta).
+- `mcp_analista/servidor.py` e `conteudo.py`: servidor MCP local (stdio; `--http` para subir na porta 8001).
 - `agente/conversa.py`: roda uma pergunta e devolve a resposta e os passos (chamadas e resultados de ferramentas).
 - `app.py`: tela de chat em Streamlit.
 - `tests/`: testes com um modelo simulado, sem chave.
@@ -23,6 +24,7 @@ Projeto de estudo: um agente com Google ADK, tela de chat em Streamlit, modelo d
 
 - Nunca escreva chaves, senhas ou tokens no código, em testes ou em commits. A chave fica no `.env`, que está no `.gitignore`.
 - Regra de segurança fica no código (guardrails, validação de argumentos), não só nas instruções do modelo.
+- Nomes de ferramenta curtos e sem parecença com palavras em inglês: modelos pequenos trocam letras (ex.: `explain_` no lugar de `explicar_`).
 - Ferramenta nova: docstring clara (o que faz, quando usar, cada argumento), validação no `guardrail_ferramenta` e um teste em `tests/`.
 - Faça uma mudança por vez, rode `uv run pytest -q` antes de terminar e mostre o que mudou.
 - Não adicione dependências sem explicar por quê.

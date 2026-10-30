@@ -1,6 +1,6 @@
 """Testes que rodam sem chave da Groq: a ferramenta, os guardrails e o agente com um modelo simulado.
 
-O teste marcado com `mcp` acessa a internet (o MCP público do DeepWiki).
+Os testes marcados com `mcp` sobem o MCP local e um deles acessa a internet (o MCP público do DeepWiki).
 """
 import asyncio
 
@@ -12,6 +12,7 @@ from google.genai import types
 from agente.conversa import perguntar
 from agente.ferramentas import estimar_custo
 from agente.guardrails import encontrar_dado_sensivel, guardrail_ferramenta
+from mcp_analista.servidor import competencias_analista_ia, consultar_glossario, roteiro_de_estudos
 
 
 class ModeloSimulado(BaseLlm):
@@ -71,3 +72,27 @@ def test_agente_chama_ferramenta_e_guardrail_barra():
     assert [p["tipo"] for p in ok["passos"]] == ["chamada", "resultado"]
     assert "não foi enviada ao modelo" in barrado["resposta"]
     assert chamadas == 2  # a mensagem com a chave não chegou ao modelo
+
+
+def test_mcp_local_funcoes():
+    assert consultar_glossario("rag")["termo"] == "rag"
+    assert consultar_glossario("Alucinacao")["termo"] == "alucinação"  # sem acento também acha
+    assert "conceitos_disponiveis" in consultar_glossario("blockchain")
+    assert "técnicas" in competencias_analista_ia()
+    r = roteiro_de_estudos(3)  # abaixo do mínimo vira 7
+    assert r["total_de_dias"] == 7 and len(r["etapas"]) == 7
+
+
+@pytest.mark.mcp
+def test_mcp_local_por_stdio():
+    """O agente sobe o servidor local como processo e enxerga as três ferramentas."""
+    from agente.agent import criar_mcp_local
+
+    async def listar():
+        ts = criar_mcp_local()
+        try:
+            return sorted(t.name for t in await ts.get_tools())
+        finally:
+            await ts.close()
+
+    assert asyncio.run(listar()) == ["competencias_analista_ia", "consultar_glossario", "roteiro_de_estudos"]
